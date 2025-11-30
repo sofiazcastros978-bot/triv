@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia de Programación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f7f1ff; /* pastel lilac */
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            background: #ffffffcc;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 0 15px #d8c8f0;
+        }
+        .btn-option {
+            border-radius: 15px;
+        }
+        #timer {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #b05ce3;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+<div class="container">
+    <h1 class="text-center mb-4 text-purple">🎮 Trivia de Programación</h1>
+
+    <div class="card shadow mx-auto" style="max-width: 600px;">
+
+        <div class="d-flex justify-content-between mb-3">
+            <p id="pregunta-numero" class="fw-bold"></p>
+            <p id="timer">⏳ 2:00</p>
+        </div>
+
+        <h4 id="pregunta"></h4>
+        <div id="opciones" class="mt-3"></div>
+
+        <button id="btn-siguiente" class="btn btn-primary w-100 mt-4" disabled>Siguiente</button>
+        <p id="resultado" class="text-center mt-3"></p>
+    </div>
+</div>
+
+<script>
+// ----------------- 60 PREGUNTAS -----------------
+// (Agrega más si quieres, sólo sigue el formato)
+const preguntasOriginales = [
+    { pregunta: "¿Qué lenguaje estructura una web?", opciones:["CSS","HTML","JS"], correcta:1 },
+    { pregunta: "¿Cuál etiqueta es incorrecta?", opciones:["<div>","<p>","<section>","<text>"], correcta:3 },
+    { pregunta: "CSS sirve para...", opciones:["Estilos","Base de datos","Servidor"], correcta:0 },
+    { pregunta: "PHP corre en...", opciones:["Cliente","Servidor","Navegador"], correcta:1 },
+    { pregunta: "Estructura básica HTML", opciones:["html-head-body","body-head","doctype-head"], correcta:0 },
+    { pregunta: "Bootstrap es...", opciones:["Framework CSS","Lenguaje","Base de datos"], correcta:0 },
+    { pregunta: "Motor BD", opciones:["MySQL","HTML","JS"], correcta:0 },
+    { pregunta: "Crear BD en SQL", opciones:["MAKE DB","CREATE DATABASE","NEW DB"], correcta:1 },
+    // Puedes agregar hasta 60 aquí...
+];
+
+// ----------------- CONFIGURACIÓN -----------------
+let preguntas = [];
+let indice = 0;
+let puntaje = 0;
+let tiempoRestante = 120; // 2 minutos
+let temporizador;
+
+const preguntaEl = document.getElementById("pregunta");
+const opcionesEl = document.getElementById("opciones");
+const btnSiguiente = document.getElementById("btn-siguiente");
+const resultadoEl = document.getElementById("resultado");
+const preguntaNumEl = document.getElementById("pregunta-numero");
+const timerEl = document.getElementById("timer");
+
+// Mezclar array
+function shuffleArray(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+}
+
+// Seleccionar 20 preguntas al azar
+function seleccionarPreguntas() {
+    preguntas = shuffleArray([...preguntasOriginales]).slice(0, 20);
+}
+
+function cargarPregunta() {
+    btnSiguiente.disabled = true;
+    resultadoEl.textContent = "";
+
+    let p = preguntas[indice];
+
+    preguntaNumEl.textContent = `Pregunta ${indice + 1} / 20`;
+    preguntaEl.textContent = p.pregunta;
+    opcionesEl.innerHTML = "";
+
+    p.opciones.forEach((op, i) => {
+        let btn = document.createElement("button");
+        btn.className = "btn btn-outline-primary w-100 mt-2 btn-option";
+        btn.textContent = op;
+        btn.onclick = () => responder(i);
+        opcionesEl.appendChild(btn);
+    });
+}
+
+function responder(i) {
+    let correcta = preguntas[indice].correcta;
+
+    if (i === correcta) {
+        resultadoEl.textContent = "✔ Correcto";
+        resultadoEl.style.color = "green";
+        puntaje++;
+    } else {
+        resultadoEl.textContent = "✘ Incorrecto";
+        resultadoEl.style.color = "red";
+    }
+
+    btnSiguiente.disabled = false;
+}
+
+btnSiguiente.onclick = () => {
+    indice++;
+    if (indice < preguntas.length) cargarPregunta();
+    else finalizarJuego();
+};
+
+function iniciarTemporizador() {
+    temporizador = setInterval(() => {
+        tiempoRestante--;
+        let min = Math.floor(tiempoRestante / 60);
+        let seg = tiempoRestante % 60;
+        timerEl.textContent = `⏳ ${min}:${seg.toString().padStart(2, '0')}`;
+
+        if (tiempoRestante <= 0) finalizarJuego();
+    }, 1000);
+}
+
+function finalizarJuego() {
+    clearInterval(temporizador);
+    preguntaEl.textContent = "Juego finalizado";
+    opcionesEl.innerHTML = "";
+    btnSiguiente.style.display = "none";
+    resultadoEl.textContent = `Tu puntaje final: ${puntaje} / 20`;
+}
+
+// Iniciar juego
+seleccionarPreguntas();
+cargarPregunta();
+iniciarTemporizador();
+</script>
+
+</body>
+</html>
